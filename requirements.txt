@@ -1,0 +1,8 @@
+Django==3.1.5
+
+# From Django
+asgiref==3.3.1
+pytz==2020.5
+sqlparse==0.4.1
+
+# Other
