@@ -6,3 +6,4 @@ pytz==2020.5
 sqlparse==0.4.1
 
 # Other
+django-bootstrap-v5==1.0.0

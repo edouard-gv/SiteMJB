@@ -1,7 +1,7 @@
-<html>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
 {%  for theme in theme_list %}
     {{ theme.mot_cle }}
 {% endfor %}
-</body>
-</html>
+{% endblock %}
