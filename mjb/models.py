@@ -13,9 +13,9 @@ class Photographie(models.Model):
         HAUTE_DEFINITION = 'Haute Dédinition (HD)', 'Haute Définition (HD)'
 
     numero = models.CharField(max_length=1000, unique=True, verbose_name='numéro_photo')
-    qualite = models.CharField(max_length=1000, blank=True, verbose_name='QualitéPhoto')
+    qualite = models.CharField(max_length=1000, blank=True, choices=Qualite.choices, verbose_name='QualitéPhoto')
     orientation = models.CharField(max_length=1000, blank=True, choices=Orientation.choices, verbose_name='OrientationPhoto')
-    nom_fichier = models.CharField(max_length=1000, choices=Qualite.choices, verbose_name='Nom_Fichier_Photo')
+    nom_fichier = models.CharField(max_length=1000, verbose_name='Nom_Fichier_Photo')
 
     def __str__(self):
         return self.numero
@@ -86,7 +86,7 @@ class Inventaire(models.Model):
     dim_hauteur = models.CharField(max_length=1000, blank=True, verbose_name='Dim_Hauteur')
     dim_base = models.CharField(max_length=1000, blank=True, verbose_name='Dim_Base')
     type_original_moulage = models.CharField(max_length=1000, blank=True, verbose_name='TypeOriginalMoulage')
-    inventaire_parent = models.ForeignKey('self', null=True, blank=True, verbose_name='lienIDInventaireOriginal', on_delete=models.RESTRICT)
+    inventaire_parent = models.ForeignKey('self', null=True, blank=True, verbose_name='lienIDInventaireOriginal', on_delete=models.RESTRICT, related_name='declinaisons')
     date_creation = models.DateTimeField(verbose_name='DateCreation')
     date_modification = models.DateTimeField(verbose_name='DateModification')
 
