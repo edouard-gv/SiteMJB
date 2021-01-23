@@ -2,16 +2,28 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-import mjb
-from mjb.models import Theme, Contact, Photographie, Matiere, Inventaire, CommentairePhoto, RelationContact
+from mjb.models import *
+
+
+class InventaireMatiereInline(admin.TabularInline):
+    model = Inventaire_Matiere
+    extra = 1
+
+
+class InventaireThemeInline(admin.TabularInline):
+    model = Inventaire_Theme
+    extra = 1
+
 
 class RelationContactInline(admin.TabularInline):
     model = RelationContact
     extra = 1
 
+
 class CommentairePhotoInline(admin.TabularInline):
     model = CommentairePhoto
     extra = 1
+
 
 class InventaireInline(admin.TabularInline):
     model = Inventaire
@@ -19,9 +31,10 @@ class InventaireInline(admin.TabularInline):
     show_change_link = True
     extra = 1
 
+
 class InventoryAdmin(admin.ModelAdmin):
-    inlines = (CommentairePhotoInline, RelationContactInline, InventaireInline, )
-    date_hierarchy = 'date_creation'
+    inlines = (CommentairePhotoInline, RelationContactInline, InventaireInline, InventaireMatiereInline, InventaireThemeInline)
+    date_hierarchy = 'date_modification'
     list_display_links = ['num_mgg', ]
     list_filter = ['themes__mot_cle', 'matieres__matiere', 'commande', 'volume', ]
     list_display = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', 'description', 'parent_link', ]
@@ -36,16 +49,25 @@ class InventoryAdmin(admin.ModelAdmin):
             return None
 
 
-
 class ContactAdmin(admin.ModelAdmin):
     inlines = (RelationContactInline, )
+
 
 class PhotographieAdmin(admin.ModelAdmin):
     inlines = (CommentairePhotoInline, )
 
+
+class MatiereAdmin(admin.ModelAdmin):
+    inlines = (InventaireMatiereInline, )
+
+
+class ThemeAdmin(admin.ModelAdmin):
+    inlines = (InventaireThemeInline, )
+
+
 admin.site.register(Inventaire, InventoryAdmin)
-admin.site.register(Theme)
+admin.site.register(Theme, ThemeAdmin)
 admin.site.register(Photographie, PhotographieAdmin)
-admin.site.register(Matiere)
+admin.site.register(Matiere, MatiereAdmin)
 admin.site.register(Contact, ContactAdmin)
 
