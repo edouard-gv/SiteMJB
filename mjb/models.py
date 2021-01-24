@@ -20,7 +20,7 @@ class Photographie(models.Model):
     import_id = models.BigIntegerField(blank=True, unique=True, null=True)
 
     def __str__(self):
-        return self.numero
+        return self.numero+" - "+self.nom_fichier
 
 
 class Theme(models.Model):
@@ -70,6 +70,8 @@ class CommentairePhoto(models.Model):
     commentaire = models.CharField(max_length=5000, blank=True)
 
 class RelationContact(models.Model):
+    #Pour importcsv: column2=inventaire(Inventaire|import_id),column3=contact(Contact|import_id),column7=etat,column8=debut,column9=fin,column10=prix_cession
+
     class EtatContact(models.TextChoices):
         ARTISTE = 'Artiste'
         PROPRIETAIRE = 'Propriétaire'
@@ -102,8 +104,8 @@ class Inventaire(models.Model):
     num_mjb2 = models.CharField(max_length=1000, blank=True, verbose_name='NUM_MJB2')
     commande = models.BooleanField(null=True, verbose_name='Commande')
     volume = models.CharField(max_length=1000, blank=True, choices=ValeursVolume.choices, verbose_name='Volume')
-    notes_mjb = models.CharField(max_length=5000, blank=True, verbose_name='NotesMJB')
-    description = models.CharField(max_length=5000, blank=True, verbose_name='Description')
+    notes_mjb = models.TextField(blank=True, verbose_name='NotesMJB')
+    description = models.TextField(blank=True, verbose_name='Description')
     dim_hauteur = models.CharField(max_length=1000, blank=True, verbose_name='Dim_Hauteur')
     dim_base = models.CharField(max_length=1000, blank=True, verbose_name='Dim_Base')
     type_original_moulage = models.CharField(max_length=1000, blank=True, verbose_name='TypeOriginalMoulage')

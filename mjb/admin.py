@@ -27,7 +27,7 @@ class CommentairePhotoInline(admin.TabularInline):
 
 class InventaireInline(admin.TabularInline):
     model = Inventaire
-    fields = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', 'description', ]
+    fields = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', ]
     show_change_link = True
     extra = 1
 
@@ -58,7 +58,8 @@ class PhotographieAdmin(admin.ModelAdmin):
 
 
 class MatiereAdmin(admin.ModelAdmin):
-    inlines = (InventaireMatiereInline, )
+    #inlines = (InventaireMatiereInline, )
+    pass
 
 
 class ThemeAdmin(admin.ModelAdmin):
