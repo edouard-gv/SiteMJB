@@ -1,6 +1,10 @@
 from enum import Enum
 
 from django.db import models
+from django.utils.safestring import mark_safe
+
+from SiteMJB import settings
+
 
 class Photographie(models.Model):
     #Pour importCSV column1=import_id,column2=numero,column3=qualite,column4=orientation,column6=nom_fichier
@@ -18,6 +22,33 @@ class Photographie(models.Model):
     orientation = models.CharField(max_length=1000, blank=True, choices=Orientation.choices, verbose_name='OrientationPhoto')
     nom_fichier = models.CharField(max_length=1000, verbose_name='Nom_Fichier_Photo')
     import_id = models.BigIntegerField(blank=True, unique=True, null=True)
+
+    def lien(self):
+        return settings.RACINE_IMAGES + self.nom_fichier
+
+    def lien_vignette(self):
+        suffixe_vignette = "-150x150"
+
+        lien_splite = self.lien().split('/')
+        chemin = "/".join(lien_splite[:-1])+"/"
+        fichier = lien_splite[-1]
+        fichier_splite = fichier.split('.')
+        if len(fichier_splite) > 1:
+            return chemin + ".".join(fichier_splite[:-1]) + suffixe_vignette + "." + fichier_splite[-1]
+        else:
+            return chemin + fichier + suffixe_vignette
+
+    def __vignette(self, taille):
+        return mark_safe('<img height="%i" width="%i" src="%s">' % (taille, taille, self.lien_vignette(),))
+
+    def vignette150(self):
+        return self.__vignette(150)
+
+    def vignette50(self):
+        return self.__vignette(50)
+
+    def image(self):
+        return mark_safe('<img src="%s">' % (self.lien(),))
 
     def __str__(self):
         return self.numero+" - "+self.nom_fichier
@@ -68,6 +99,9 @@ class CommentairePhoto(models.Model):
     inventaire = models.ForeignKey('Inventaire', on_delete=models.CASCADE)
     photographie = models.ForeignKey(Photographie, on_delete=models.CASCADE)
     commentaire = models.CharField(max_length=5000, blank=True)
+
+    def vignette(self):
+        return self.photographie.vignette50()
 
 class RelationContact(models.Model):
     #Pour importcsv: column2=inventaire(Inventaire|import_id),column3=contact(Contact|import_id),column7=etat,column8=debut,column9=fin,column10=prix_cession

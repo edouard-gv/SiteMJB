@@ -10,6 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+#SETTING SPECIFIQUE AU SITE
+
+RACINE_IMAGES = "https://www.mariejobourron.com/wp-content/uploads/inventaire/"
+
+#FIN
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
