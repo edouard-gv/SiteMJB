@@ -1,0 +1,10 @@
+{
+    "production": {
+        "aws_region": "eu-west-3",
+        "django_settings": "SiteMJB.settings",
+        "profile_name": "default",
+        "project_name": "sitemjb",
+        "runtime": "python3.7",
+        "s3_bucket": "zappa-uxwswl7t8"
+    }
+}
