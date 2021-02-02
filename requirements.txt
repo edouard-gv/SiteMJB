@@ -14,3 +14,4 @@ pytest-django==4.1.0
 
 # ops
 zappa==0.52.0
+django-s3-sqlite==0.0.3

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'mjb.apps.MjbConfig',
     'bootstrap5',
     'csvimport.app.CSVImportConf',
+    'django_s3_sqlite',
 ]
 
 MIDDLEWARE = [
@@ -90,6 +91,13 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django_s3_sqlite",
+#         "NAME": "db.sqlite3",
+#         "BUCKET": "bac-a-sable",
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
