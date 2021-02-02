@@ -1,6 +1,4 @@
 from django.contrib import admin
-from django.urls import reverse
-from django.utils.safestring import mark_safe
 
 from mjb.models import *
 
@@ -22,63 +20,54 @@ class RelationContactInline(admin.TabularInline):
 
 class CommentairePhotoInline(admin.TabularInline):
     model = CommentairePhoto
-    readonly_fields = ('vignette', 'inventaire_' )
+    readonly_fields = ('vignette', 'lien', )
     extra = 1
-
-    def inventaire_(self, commentairePhoto):
-        url = reverse("admin:mjb_inventaire_change", args=[commentairePhoto.inventaire.id])
-        link = '<a href="%s">%s</a>' % (url, commentairePhoto.inventaire)
-        return mark_safe(link)
 
 
 class InventaireInline(admin.TabularInline):
     model = Inventaire
-    fields = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', ]
-    show_change_link = True
+    fields = ['lien', 'vignette', 'nom', 'num_mgg', 'num_mjb1', 'num_mjb2', ]
+    readonly_fields = ['vignette', 'lien', ]
     extra = 1
 
 
 class InventaireAdmin(admin.ModelAdmin):
     inlines = (CommentairePhotoInline, RelationContactInline, InventaireInline, InventaireMatiereInline, InventaireThemeInline)
-    readonly_fields = ('inventaire_parent_',)
+    readonly_fields = ['lien_de_suite', 'vignette', ]
+    exclude = ['import_id', ]
 
     date_hierarchy = 'date_modification'
     list_display_links = ['num_mgg', ]
     list_filter = ['themes__mot_cle', 'matieres__matiere', 'commande', 'volume', ]
-    list_display = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', 'description', 'inventaire_parent_', 'vignette']
+    list_display = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', 'de_suite', 'vignette',]
     search_fields = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', 'description', ]
 
-    def inventaire_parent_(self, inventaire):
-        if (inventaire.inventaire_parent):
-            url = reverse("admin:mjb_inventaire_change", args=[inventaire.inventaire_parent.id])
-            link = '<a href="%s">%s</a>' % (url, inventaire.inventaire_parent)
-            return mark_safe(link)
-        else:
-            return None
+    def lien_de_suite(self, inventaire):
+        return inventaire.inventaire_parent.lien() if inventaire.inventaire_parent else None
 
-    def vignette(self, inventaire):
-        if inventaire.photographies.count() >= 1:
-            return inventaire.photographies.all()[0].vignette50()
-        else:
-            return None
+    def de_suite(self, inventaire):
+        return self.lien_de_suite(inventaire)
 
 
 class ContactAdmin(admin.ModelAdmin):
     inlines = (RelationContactInline, )
+    exclude = ('import_id',)
 
 
 class PhotographieAdmin(admin.ModelAdmin):
     readonly_fields = ('image', )
     inlines = (CommentairePhotoInline, )
+    exclude = ('import_id',)
 
 
 class MatiereAdmin(admin.ModelAdmin):
     #inlines = (InventaireMatiereInline, )
-    pass
+    exclude = ('import_id',)
 
 
 class ThemeAdmin(admin.ModelAdmin):
     inlines = (InventaireThemeInline, )
+    exclude = ('import_id',)
 
 
 admin.site.register(Inventaire, InventaireAdmin)

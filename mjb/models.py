@@ -1,6 +1,5 @@
-from enum import Enum
-
 from django.db import models
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from SiteMJB import settings
@@ -67,6 +66,9 @@ class Inventaire_Theme(models.Model):
     inventaire = models.ForeignKey('Inventaire', on_delete=models.CASCADE)
     theme = models.ForeignKey(Theme, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return str(self.theme)+"/"+str(self.inventaire)
+
 
 class Matiere(models.Model):
     #Pour importcsv: column1=import_id,column2=matiere
@@ -81,6 +83,9 @@ class Inventaire_Matiere(models.Model):
     #Pour importcsv: column2=inventaire(Inventaire|import_id),column3=matiere(Matiere|import_id)
     inventaire = models.ForeignKey('Inventaire', on_delete=models.CASCADE)
     matiere = models.ForeignKey(Matiere, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.matiere)+"/"+str(self.inventaire)
 
 
 class Contact(models.Model):
@@ -103,6 +108,13 @@ class CommentairePhoto(models.Model):
     def vignette(self):
         return self.photographie.vignette50()
 
+    def lien(self):
+        return self.inventaire.lien()
+
+    def __str__(self):
+        return str(self.photographie)+"/"+str(self.inventaire)
+
+
 class RelationContact(models.Model):
     #Pour importcsv: column2=inventaire(Inventaire|import_id),column3=contact(Contact|import_id),column7=etat,column8=debut,column9=fin,column10=prix_cession
 
@@ -123,6 +135,8 @@ class RelationContact(models.Model):
     fin = models.CharField(max_length=1000, blank=True, verbose_name='ContactDateFin')
     prix_cession = models.CharField(max_length=1000, blank=True, verbose_name='PrixCession')
 
+    def __str__(self):
+        return str(self.contact)+"/"+str(self.inventaire)
 
 
 class Inventaire(models.Model):
@@ -133,25 +147,39 @@ class Inventaire(models.Model):
         BAS_RELIEF = 'Bas-relief'
 
     nom = models.CharField(max_length=1000, verbose_name='Nom')
-    num_mgg = models.CharField(max_length=1000, unique=True, verbose_name='NUM_MGG')
-    num_mjb1 = models.CharField(max_length=1000, verbose_name='NUM_MJB1')
-    num_mjb2 = models.CharField(max_length=1000, blank=True, verbose_name='NUM_MJB2')
+    num_mgg = models.CharField(max_length=1000, unique=True, verbose_name='N° d\'inventaire')
+    num_mjb1 = models.CharField(max_length=1000, blank=True, verbose_name='N° Marie-Jo')
+    num_mjb2 = models.CharField(max_length=1000, blank=True, verbose_name='Complément')
     commande = models.BooleanField(null=True, verbose_name='Commande')
     volume = models.CharField(max_length=1000, blank=True, choices=ValeursVolume.choices, verbose_name='Volume')
-    notes_mjb = models.TextField(blank=True, verbose_name='NotesMJB')
+    notes_mjb = models.TextField(blank=True, verbose_name='Notes Marie-Jo')
     description = models.TextField(blank=True, verbose_name='Description')
-    dim_hauteur = models.CharField(max_length=1000, blank=True, verbose_name='Dim_Hauteur')
-    dim_base = models.CharField(max_length=1000, blank=True, verbose_name='Dim_Base')
-    type_original_moulage = models.CharField(max_length=1000, blank=True, verbose_name='TypeOriginalMoulage')
-    inventaire_parent = models.ForeignKey('self', null=True, blank=True, verbose_name='lienIDInventaireOriginal', on_delete=models.RESTRICT, related_name='declinaisons')
-    date_creation = models.DateTimeField(verbose_name='DateCreation', auto_now_add=True)
-    date_modification = models.DateTimeField(verbose_name='DateModification', auto_now=True)
+    dim_hauteur = models.CharField(max_length=1000, blank=True, verbose_name='Hauteur (cm)')
+    dim_base = models.CharField(max_length=1000, blank=True, verbose_name='Base (cm)')
+    type_original_moulage = models.CharField(max_length=1000, blank=True, verbose_name='Connu/Inconnu/De suite')
+    inventaire_parent = models.ForeignKey('self', null=True, blank=True, verbose_name='De suite', on_delete=models.RESTRICT, related_name='declinaisons')
+    date_creation = models.DateTimeField(verbose_name='Date création fiche', auto_now_add=True)
+    date_modification = models.DateTimeField(verbose_name='Date modification fiche', auto_now=True)
     import_id = models.BigIntegerField(blank=True, unique=True, null=True)
 
     themes = models.ManyToManyField(Theme, blank=True, through=Inventaire_Theme)
     photographies = models.ManyToManyField(Photographie, through=CommentairePhoto)
     matieres = models.ManyToManyField(Matiere, blank=True, verbose_name='matière', through=Inventaire_Matiere)
     contacts = models.ManyToManyField(Contact, through=RelationContact)
+
+    def couverture(self):
+        if self.photographies.count() >= 1:
+            return self.photographies.all()[0]
+        else:
+            return None
+
+    def vignette(self):
+        return self.couverture().vignette50() if self.couverture() is not None else None
+
+    def lien(self):
+        url = reverse("admin:mjb_inventaire_change", args=[self.id])
+        link = '<a href="%s">%s</a>' % (url, self)
+        return mark_safe(link)
 
     def __str__(self):
         return self.num_mgg
