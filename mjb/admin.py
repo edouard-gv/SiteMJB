@@ -35,6 +35,7 @@ class InventaireAdmin(admin.ModelAdmin):
     inlines = (CommentairePhotoInline, RelationContactInline, InventaireInline, InventaireMatiereInline, InventaireThemeInline)
     readonly_fields = ['lien_de_suite', 'vignette', ]
     exclude = ['import_id', ]
+    ordering = ['-num_mgg', ]
 
     date_hierarchy = 'date_modification'
     list_display_links = ['num_mgg', ]
