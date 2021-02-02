@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models.functions import Lower
 
 from mjb.models import *
 
@@ -64,6 +65,9 @@ class PhotographieAdmin(admin.ModelAdmin):
 class MatiereAdmin(admin.ModelAdmin):
     #inlines = (InventaireMatiereInline, )
     exclude = ('import_id',)
+
+    def get_ordering(self, request):
+        return [Lower('matiere')]
 
 
 class ThemeAdmin(admin.ModelAdmin):
