@@ -62,10 +62,10 @@ class InventaireInline(admin.TabularInline):
 
 class InventaireAdmin(admin.ModelAdmin):
     inlines = (InventaireInline, InventaireMatiereInline, InventaireThemeInline, CommentairePhotoInline, RelationContactInline, )
-    readonly_fields = ['lien_de_suite', 'vignette', 'date_creation', 'date_modification', ]
+    readonly_fields = ['lien_original', 'de_suite_de', 'vignette', 'date_creation', 'date_modification', ]
     fieldsets = [
         (None, {
-            'fields': (('num_mgg', 'nom', 'vignette'), ('num_mjb1', 'num_mjb2'),)
+            'fields': (('num_mgg', 'nom', 'vignette'), ('de_suite_de',), ('num_mjb1', 'num_mjb2'),)
         }),
         (None, {
             'fields': ('description', 'notes_mjb')
@@ -76,8 +76,8 @@ class InventaireAdmin(admin.ModelAdmin):
         (None, {
             'fields': (('date_creation', 'date_modification'),)
         }),
-        ("DE SUITE (PARENT)", {
-            'fields': (('type_original_moulage', 'lien_de_suite', 'inventaire_parent'),)
+        ("ORIGINAL (PARENT)", {
+            'fields': (('type_original_moulage', 'lien_original', 'inventaire_parent'),)
         }),
     ]
     formfield_overrides = {
@@ -87,20 +87,29 @@ class InventaireAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_modification'
     list_display_links = ['num_mgg', ]
     list_filter = ['themes__mot_cle', 'matieres__matiere', 'commande', 'volume', ]
-    list_display = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', 'de_suite', 'vignette',]
+    list_display = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', 'original', 'vignette',]
     search_fields = ['nom', 'num_mgg', 'num_mjb1', 'num_mjb2', 'description', ]
     ordering = ['-num_mgg', ]
 
-    def lien_de_suite(self, inventaire):
+    def lien_original(self, inventaire):
         return inventaire.inventaire_parent.lien() if inventaire.inventaire_parent else None
 
-    def de_suite(self, inventaire):
-        return self.lien_de_suite(inventaire)
+    def original(self, inventaire):
+        return self.lien_original(inventaire)
+
+    def de_suite_de(self, inventaire):
+        return self.lien_original(inventaire)
 
 
 class ContactAdmin(admin.ModelAdmin):
-    inlines = (RelationContactInline, )
+    #inlines = (RelationContactInline, )
     exclude = ('import_id',)
+
+    ordering = ['institution', 'nom', 'prenom', ]
+    #list_filter = ordering
+    list_display = ordering
+    search_fields = ordering
+    list_display_links = ordering
 
 
 class PhotographieAdmin(admin.ModelAdmin):
@@ -118,8 +127,11 @@ class MatiereAdmin(admin.ModelAdmin):
 
 
 class ThemeAdmin(admin.ModelAdmin):
-    inlines = (InventaireThemeInline, )
+    #inlines = (InventaireThemeInline, )
     exclude = ('import_id',)
+
+    def get_ordering(self, request):
+        return [Lower('mot_cle')]
 
 
 admin.site.register(Inventaire, InventaireAdmin)

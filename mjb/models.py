@@ -96,7 +96,11 @@ class Contact(models.Model):
     import_id = models.BigIntegerField(blank=True, unique=True, null=True)
 
     def __str__(self):
-        return self.institution + ' - ' + self.nom + ' - ' + self.prenom
+        list = []
+        for data in [self.institution, self.nom, self.prenom]:
+            if data is not None and len(data) > 1:
+                list.append(data)
+        return " - ".join(list)
 
 
 class CommentairePhoto(models.Model):
@@ -157,7 +161,7 @@ class Inventaire(models.Model):
     dim_hauteur = models.CharField(max_length=1000, blank=True, verbose_name='Hauteur (cm)')
     dim_base = models.CharField(max_length=1000, blank=True, verbose_name='Base (cm)')
     type_original_moulage = models.CharField(max_length=1000, blank=True, verbose_name='Connu/Inconnu/De suite')
-    inventaire_parent = models.ForeignKey('self', null=True, blank=True, verbose_name='De suite', on_delete=models.RESTRICT, related_name='declinaisons')
+    inventaire_parent = models.ForeignKey('self', null=True, blank=True, verbose_name='Original', on_delete=models.RESTRICT, related_name='declinaisons')
     date_creation = models.DateTimeField(verbose_name='Date création fiche', auto_now_add=True)
     date_modification = models.DateTimeField(verbose_name='Date modification fiche', auto_now=True)
     import_id = models.BigIntegerField(blank=True, unique=True, null=True)
