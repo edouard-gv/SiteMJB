@@ -9,3 +9,4 @@ def test_lien_vignette_sans_extension():
     photo = Photographie()
     photo.nom_fichier="hoho"
     assert photo.lien_vignette() == "https://www.mariejobourron.com/wp-content/uploads/inventaire/hoho-150x150"
+
