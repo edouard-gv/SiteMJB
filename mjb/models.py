@@ -16,7 +16,7 @@ class Photographie(models.Model):
         BASSE_DEFINITION = 'Basse Définition (BD)', 'Basse Définition (BD)'
         HAUTE_DEFINITION = 'Haute Dédinition (HD)', 'Haute Définition (HD)'
 
-    numero = models.CharField(max_length=1000, unique=True, verbose_name='numéro_photo')
+    numero = models.CharField(max_length=1000, blank=True, verbose_name='numéro_photo')
     qualite = models.CharField(max_length=1000, blank=True, choices=Qualite.choices, verbose_name='QualitéPhoto')
     orientation = models.CharField(max_length=1000, blank=True, choices=Orientation.choices, verbose_name='OrientationPhoto')
     nom_fichier = models.CharField(max_length=1000, verbose_name='Nom_Fichier_Photo')
@@ -50,7 +50,7 @@ class Photographie(models.Model):
         return mark_safe('<img src="%s">' % (self.lien(),))
 
     def __str__(self):
-        return self.numero+" - "+self.nom_fichier
+        return (self.numero+" - " if self.numero else "")+self.nom_fichier
 
 
 class Theme(models.Model):
