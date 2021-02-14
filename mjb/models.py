@@ -172,17 +172,40 @@ class Inventaire(models.Model):
     contacts = models.ManyToManyField(Contact, through=RelationContact)
 
     def couverture(self):
-        if self.photographies.count() >= 1:
-            return self.photographies.all()[0]
+        dernier_com_photo = CommentairePhoto.objects.filter(inventaire=self).order_by("-id").first()
+        if dernier_com_photo:
+            return dernier_com_photo
+        elif self.inventaire_parent:
+            dernier_com_photo_dune_soeur = \
+                CommentairePhoto.objects.filter(inventaire__inventaire_parent=
+                                            self.inventaire_parent).order_by("-id").first()
+            if dernier_com_photo_dune_soeur:
+                return dernier_com_photo_dune_soeur
+            else:
+                dernier_com_photo_du_parent = \
+                    CommentairePhoto.objects.filter(inventaire=
+                                            self.inventaire_parent).order_by("-id").first()
+                return dernier_com_photo_du_parent
         else:
-            return None
+            dernier_com_photo_denfant = \
+                CommentairePhoto.objects.filter(inventaire__inventaire_parent=
+                                            self).order_by("-id").first()
+            if dernier_com_photo_denfant:
+                return dernier_com_photo_denfant
+        return None
 
     def vignette(self):
-        return self.couverture().vignette50() if self.couverture() is not None else None
+        couverture = self.couverture()
+        if couverture:
+            if couverture.inventaire != self:
+                return couverture.photographie.vignette50() + couverture.inventaire.lien(texte="*")
+            else:
+                return couverture.photographie.vignette50()
+        return None
 
-    def lien(self):
+    def lien(self, texte=""):
         url = reverse("admin:mjb_inventaire_change", args=[self.id])
-        link = '<a href="%s">%s</a>' % (url, self)
+        link = '<a href="%s">%s%s</a>' % (url, texte, self)
         return mark_safe(link)
 
     def __str__(self):
