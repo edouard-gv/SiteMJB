@@ -198,15 +198,25 @@ class Inventaire(models.Model):
         couverture = self.couverture()
         if couverture:
             if couverture.inventaire != self:
-                return couverture.photographie.vignette50() + couverture.inventaire.lien(texte="*")
+                return self.__superpose__(50, couverture.photographie.vignette50(), couverture.inventaire.lien(texte="*"))
             else:
                 return couverture.photographie.vignette50()
         return None
 
+    def __superpose__(self, taille, texte, image):
+        return mark_safe("""<div style="position:relative; height:%dpx">
+               <div style="position:absolute;z-index:1">
+                  %s
+               </div>
+               <div style="position:absolute;top:34px;z-index:2;font-size:xx-small;background-color:#FFFFFF66;">
+                  %s
+                </div> 
+            </div>""" % (taille, texte, image))
+
     def lien(self, texte=""):
         url = reverse("admin:mjb_inventaire_change", args=[self.id])
-        link = '<a href="%s">%s%s</a>' % (url, texte, self)
+        link = '<a href="%s">%s%s</a>' % (url, texte, self.num_mgg)
         return mark_safe(link)
 
     def __str__(self):
-        return self.num_mgg
+        return self.num_mgg + " (" + self.num_mjb1 + (", " + self.num_mjb2 if self.num_mjb2 else "") + ") - " + self.nom

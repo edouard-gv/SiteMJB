@@ -62,10 +62,10 @@ class InventaireInline(admin.TabularInline):
 
 class InventaireAdmin(admin.ModelAdmin):
     inlines = (InventaireInline, InventaireMatiereInline, InventaireThemeInline, CommentairePhotoInline, RelationContactInline, )
-    readonly_fields = ['lien_original', 'de_suite_de', 'vignette', 'date_creation', 'date_modification', ]
+    readonly_fields = ['lien_original', 'vignette_original', 'de_suite_de', 'vignette', 'date_creation', 'date_modification', ]
     fieldsets = [
         (None, {
-            'fields': (('num_mgg', 'nom', 'vignette'), ('de_suite_de',), ('num_mjb1', 'num_mjb2'),)
+            'fields': (('num_mgg', 'nom', 'vignette'), ('de_suite_de', 'vignette_original', ), ('num_mjb1', 'num_mjb2'),)
         }),
         (None, {
             'fields': ('description', 'notes_mjb')
@@ -93,6 +93,9 @@ class InventaireAdmin(admin.ModelAdmin):
 
     def lien_original(self, inventaire):
         return inventaire.inventaire_parent.lien() if inventaire.inventaire_parent else None
+
+    def vignette_original(self, inventaire):
+        return inventaire.inventaire_parent.vignette() if inventaire.inventaire_parent else None
 
     def original(self, inventaire):
         return self.lien_original(inventaire)
