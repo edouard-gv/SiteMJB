@@ -8,12 +8,14 @@ class MappingsTestCaseWithDB(django.test.TestCase):
     # famille A : parent et enfant avec photo sauf un enfant
     # famille B : parent avec photo mais aucun enfant n'en a
     # famille C : parent sans photo mais certains enfant en ont
+    # solo : inventaire sans relations, pour les tests sur image_ok et ko
 
     def setUp(self):
         photo_1 = Photographie.objects.create(nom_fichier="photo1")
         photo_2 = Photographie.objects.create(nom_fichier="photo2")
         photo_3 = Photographie.objects.create(nom_fichier="photo3")
         photo_4 = Photographie.objects.create(nom_fichier="photo4")
+        self.photo_KO = Photographie.objects.create(nom_fichier="photoKO", image_ok=False)
 
         self.parent_A = Inventaire.objects.create(nom="test", num_mgg="MGG_0001", num_mjb1="001")
         self.fille_A_1 = Inventaire.objects.create(nom="test", num_mgg="MGG_0002", num_mjb1="001",
@@ -62,3 +64,44 @@ class MappingsTestCaseWithDB(django.test.TestCase):
 
     def test_ou_la_plus_recente_de_mes_enfants(self):
         self.assertEqual("photo3", self.parent_C.couverture().photographie.nom_fichier)
+
+    def test_ma_derniere_photo_avant_tout_exclue_KO(self):
+        CommentairePhoto.objects.create(inventaire=self.parent_A, photographie=self.photo_KO)
+        CommentairePhoto.objects.create(inventaire=self.fille_A_1, photographie=self.photo_KO)
+        CommentairePhoto.objects.create(inventaire=self.fille_A_2, photographie=self.photo_KO)
+
+        self.assertEqual("photo1", self.parent_A.couverture().photographie.nom_fichier)
+        self.assertEqual("photo2", self.fille_A_1.couverture().photographie.nom_fichier)
+        self.assertEqual("photo4", self.fille_A_2.couverture().photographie.nom_fichier)
+
+    def test_ou_la_plus_recente_de_mes_soeurs_exclue_KO(self):
+        CommentairePhoto.objects.create(inventaire=self.fille_A_2, photographie=self.photo_KO)
+        self.assertEqual("photo4", self.fille_A_3.couverture().photographie.nom_fichier)
+
+    def test_ou_la_plus_recente_de_mon_parent_exclue_KO(self):
+        CommentairePhoto.objects.create(inventaire=self.parent_B, photographie=self.photo_KO)
+        CommentairePhoto.objects.create(inventaire=self.parent_B, photographie=self.photo_KO)
+        self.assertEqual("photo2", self.fille_B_1.couverture().photographie.nom_fichier)
+        self.assertEqual("photo2", self.fille_B_2.couverture().photographie.nom_fichier)
+
+    def test_ou_la_plus_recente_de_mes_enfants_exclue_KO(self):
+        CommentairePhoto.objects.create(inventaire=self.fille_C_1, photographie=self.photo_KO)
+        self.assertEqual("photo3", self.parent_C.couverture().photographie.nom_fichier)
+
+    def test_ignore_photo_ko_ordre_decroissant(self):
+        photo_OK = Photographie.objects.create(nom_fichier="photoOK")
+        photo_KO = Photographie.objects.create(nom_fichier="photoKO", image_ok=False)
+        solo = Inventaire.objects.create(nom="test", num_mgg="MGG_0023", num_mjb1="023")
+        CommentairePhoto.objects.create(inventaire=solo, photographie=photo_OK)
+        CommentairePhoto.objects.create(inventaire=solo, photographie=photo_KO)
+
+        self.assertEqual("photoOK", solo.couverture().photographie.nom_fichier)
+
+    def test_ignore_photo_ko_ordre_croissant(self):
+        photo_KO = Photographie.objects.create(nom_fichier="photoKO", image_ok=False)
+        photo_OK = Photographie.objects.create(nom_fichier="photoOK")
+        solo = Inventaire.objects.create(nom="test", num_mgg="MGG_0023", num_mjb1="023")
+        CommentairePhoto.objects.create(inventaire=solo, photographie=photo_KO)
+        CommentairePhoto.objects.create(inventaire=solo, photographie=photo_OK)
+
+        self.assertEqual("photoOK", solo.couverture().photographie.nom_fichier)

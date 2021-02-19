@@ -21,27 +21,33 @@ class Photographie(models.Model):
     orientation = models.CharField(max_length=1000, blank=True, choices=Orientation.choices, verbose_name='OrientationPhoto')
     nom_fichier = models.CharField(max_length=1000, verbose_name='Nom_Fichier_Photo')
     import_id = models.BigIntegerField(blank=True, unique=True, null=True)
+    image_ok = models.BooleanField(null=True)
+    vignette_ok = models.BooleanField(null=True)
 
     def lien(self):
         return settings.RACINE_IMAGES + self.nom_fichier
 
     def lien_vignette(self):
-        suffixe_vignette = "-150x150"
-
         lien_splite = self.lien().split('/')
         chemin = "/".join(lien_splite[:-1])+"/"
         fichier = lien_splite[-1]
+        return chemin + self.fichier_vignette(fichier)
+
+    @staticmethod
+    def fichier_vignette(fichier):
+        suffixe_vignette = "-150x150"
+
         fichier_splite = fichier.split('.')
         if len(fichier_splite) > 1:
-            return chemin + ".".join(fichier_splite[:-1]) + suffixe_vignette + "." + fichier_splite[-1]
+            nom_vignette = ".".join(fichier_splite[:-1]) + suffixe_vignette + "." + fichier_splite[-1]
         else:
-            return chemin + fichier + suffixe_vignette
+            nom_vignette = fichier + suffixe_vignette
+        return nom_vignette
 
     def __vignette(self, taille):
-        return mark_safe('<img height="%i" width="%i" src="%s">' % (taille, taille, self.lien_vignette(),))
-
-    def vignette150(self):
-        return self.__vignette(150)
+        if self.vignette_ok:
+            return mark_safe('<img height="%i" width="%i" src="%s">' % (taille, taille, self.lien_vignette(),))
+        return mark_safe('<img height="%i" src="%s">' % (taille, self.lien(),))
 
     def vignette50(self):
         return self.__vignette(50)
@@ -172,24 +178,24 @@ class Inventaire(models.Model):
     contacts = models.ManyToManyField(Contact, through=RelationContact)
 
     def couverture(self):
-        dernier_com_photo = CommentairePhoto.objects.filter(inventaire=self).order_by("-id").first()
+        dernier_com_photo = CommentairePhoto.objects.filter(inventaire=self).exclude(photographie__image_ok=False).order_by("-id").first()
         if dernier_com_photo:
             return dernier_com_photo
         elif self.inventaire_parent:
             dernier_com_photo_dune_soeur = \
                 CommentairePhoto.objects.filter(inventaire__inventaire_parent=
-                                            self.inventaire_parent).order_by("-id").first()
+                                            self.inventaire_parent).exclude(photographie__image_ok=False).order_by("-id").first()
             if dernier_com_photo_dune_soeur:
                 return dernier_com_photo_dune_soeur
             else:
                 dernier_com_photo_du_parent = \
                     CommentairePhoto.objects.filter(inventaire=
-                                            self.inventaire_parent).order_by("-id").first()
+                                            self.inventaire_parent).exclude(photographie__image_ok=False).order_by("-id").first()
                 return dernier_com_photo_du_parent
         else:
             dernier_com_photo_denfant = \
                 CommentairePhoto.objects.filter(inventaire__inventaire_parent=
-                                            self).order_by("-id").first()
+                                            self).exclude(photographie__image_ok=False).order_by("-id").first()
             if dernier_com_photo_denfant:
                 return dernier_com_photo_denfant
         return None

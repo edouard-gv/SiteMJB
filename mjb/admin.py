@@ -118,7 +118,14 @@ class ContactAdmin(admin.ModelAdmin):
 class PhotographieAdmin(admin.ModelAdmin):
     readonly_fields = ('image', )
     inlines = (CommentairePhotoInline, )
-    exclude = ('import_id',)
+    exclude = ('import_id', 'vignette_ok', 'image_ok')
+
+    list_display = ['nom_fichier', 'vignette50', 'liens_inventaires']
+    list_filter = ['image_ok',]
+
+    def liens_inventaires(self, photo):
+        return mark_safe(" ".join([com.inventaire.lien()
+                                   for com in CommentairePhoto.objects.filter(photographie_id = photo.id)]))
 
 
 class MatiereAdmin(admin.ModelAdmin):
