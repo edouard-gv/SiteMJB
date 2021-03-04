@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
         print("%d photos vérifées" % i)
 
     operations = [
-        migrations.RunPython(import_meta_data),
+        # migrations.RunPython(import_meta_data),
     ]
 
 

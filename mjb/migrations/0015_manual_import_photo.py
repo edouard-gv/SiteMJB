@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
         print(inv_introuvables)
 
     operations = [
-        migrations.RunPython(import_photo),
+        # migrations.RunPython(import_photo),
     ]
 
 
