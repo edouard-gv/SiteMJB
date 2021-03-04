@@ -131,19 +131,21 @@ class RelationContact(models.Model):
     class EtatContact(models.TextChoices):
         ARTISTE = 'Artiste'
         PROPRIETAIRE = 'Propriétaire'
-        MARCHAND = 'Marchand'
         COMMANDITAIRE = 'Commanditaire'
-        CIREUR = 'Cireur'
+        MARCHAND = 'Marchand'
         MOULEUR = 'Mouleur'
-        MARBRIER = 'Marbrier'
+        CIREUR = 'Cireur'
         FONDEUR = 'Fondeur'
+        CISELEUR = 'Ciseleur'
+        MARBRIER = 'Marbrier'
+        AUTRE = 'Autre'
 
     inventaire = models.ForeignKey('Inventaire', on_delete=models.CASCADE)
     contact = models.ForeignKey(Contact, on_delete=models.CASCADE)
-    etat = models.CharField(max_length=1000, choices=EtatContact.choices, verbose_name='EtatContact')
-    debut = models.CharField(max_length=1000, blank=True, verbose_name='ContactDateDebut')
-    fin = models.CharField(max_length=1000, blank=True, verbose_name='ContactDateFin')
-    prix_cession = models.CharField(max_length=1000, blank=True, verbose_name='PrixCession')
+    etat = models.CharField(max_length=1000, choices=EtatContact.choices, verbose_name='Qualité')
+    debut = models.CharField(max_length=1000, blank=True, verbose_name='Date Début')
+    fin = models.CharField(max_length=1000, blank=True, verbose_name='Date Fin')
+    prix_cession = models.CharField(max_length=1000, blank=True, verbose_name='Prix Cession/Autre qualité')
 
     def __str__(self):
         return str(self.contact)+"/"+str(self.inventaire)
