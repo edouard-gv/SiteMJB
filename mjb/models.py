@@ -157,6 +157,7 @@ class Inventaire(models.Model):
     class ValeursVolume(models.TextChoices):
         RONDE_BOSSE = 'Ronde-bosse'
         BAS_RELIEF = 'Bas-relief'
+        HAUT_RELIEF = 'Haut-relief'
 
     nom = models.CharField(max_length=1000, verbose_name='Nom')
     num_mgg = models.CharField(max_length=1000, unique=True, verbose_name='N° d\'inventaire')
