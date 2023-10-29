@@ -62,13 +62,14 @@ class InventaireInline(admin.TabularInline):
 
 class InventaireAdmin(admin.ModelAdmin):
     inlines = (InventaireInline, InventaireMatiereInline, InventaireThemeInline, CommentairePhotoInline, RelationContactInline, )
-    readonly_fields = ['lien_original', 'vignette_original', 'de_suite_de', 'vignette', 'date_creation', 'date_modification', 'notes_marie_jo_parent', ]
+    readonly_fields = ['lien_original', 'vignette_original', 'de_suite_de', 'vignette', 'date_creation', 'date_modification', 'notes_marie_jo_parent', 'description_du_modèle']
+    readonly_fields_modele = ['lien_original', 'vignette_original', 'de_suite_de', 'vignette', 'date_creation', 'date_modification', 'notes_marie_jo_parent', ]
     fieldsets = [
         (None, {
             'fields': (('num_mgg', 'nom', 'vignette'), ('de_suite_de', 'vignette_original', ), ('num_mjb1', 'num_mjb2'),)
         }),
         (None, {
-            'fields': ('description', 'notes_marie_jo_parent', 'notes_mjb')
+            'fields': ('description_du_modèle', 'description', 'notes_marie_jo_parent', 'notes_mjb')
         }),
         (None, {
             'fields': ('commande', ('volume', 'dim_hauteur', 'dim_base'))
@@ -80,6 +81,36 @@ class InventaireAdmin(admin.ModelAdmin):
             'fields': (('type_original_moulage', 'lien_original', 'inventaire_parent'),)
         }),
     ]
+    fieldsets_model = [
+        (None, {
+            'fields': (('num_mgg', 'nom', 'vignette'), ('de_suite_de', 'vignette_original', ), ('num_mjb1', 'num_mjb2'),)
+        }),
+        (None, {
+            'fields': ('description_modele', 'description', 'notes_marie_jo_parent', 'notes_mjb')
+        }),
+        (None, {
+            'fields': ('commande', ('volume', 'dim_hauteur', 'dim_base'))
+        }),
+        (None, {
+            'fields': (('date_creation', 'date_modification'),)
+        }),
+        ("ORIGINAL (PARENT)", {
+            'fields': (('type_original_moulage', 'lien_original', 'inventaire_parent'),)
+        }),
+    ]
+
+    def get_fieldsets(self, request, obj=None):
+        if obj.inventaire_parent:
+            return self.fieldsets
+        else:
+            return self.fieldsets_model
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj.inventaire_parent:
+            return self.readonly_fields
+        else:
+            return self.readonly_fields_modele
+
     formfield_overrides = {
         models.CharField: {'widget': TextInput(attrs={'size': INPUT_WIDTH})},
     }

@@ -6,7 +6,7 @@ from SiteMJB import settings
 
 
 class Photographie(models.Model):
-    #Pour importCSV column1=import_id,column2=numero,column3=qualite,column4=orientation,column6=nom_fichier
+    # Pour importCSV column1=import_id,column2=numero,column3=qualite,column4=orientation,column6=nom_fichier
 
     class Orientation(models.TextChoices):
         PORTRAIT = 'Portrait'
@@ -29,7 +29,7 @@ class Photographie(models.Model):
 
     def lien_vignette(self):
         lien_splite = self.lien().split('/')
-        chemin = "/".join(lien_splite[:-1])+"/"
+        chemin = "/".join(lien_splite[:-1]) + "/"
         fichier = lien_splite[-1]
         return chemin + self.fichier_vignette(fichier)
 
@@ -56,7 +56,7 @@ class Photographie(models.Model):
         return mark_safe('<img src="%s">' % (self.lien(),))
 
     def __str__(self):
-        return (self.numero+" - " if self.numero else "")+self.nom_fichier
+        return (self.numero + " - " if self.numero else "") + self.nom_fichier
 
 
 class Theme(models.Model):
@@ -68,16 +68,16 @@ class Theme(models.Model):
 
 
 class Inventaire_Theme(models.Model):
-    #Pour importcsv: column2=inventaire(Inventaire|import_id),column3=theme(Theme|import_id)
+    # Pour importcsv: column2=inventaire(Inventaire|import_id),column3=theme(Theme|import_id)
     inventaire = models.ForeignKey('Inventaire', on_delete=models.CASCADE)
     theme = models.ForeignKey(Theme, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.theme)+"/"+str(self.inventaire)
+        return str(self.theme) + "/" + str(self.inventaire)
 
 
 class Matiere(models.Model):
-    #Pour importcsv: column1=import_id,column2=matiere
+    # Pour importcsv: column1=import_id,column2=matiere
     matiere = models.CharField(max_length=1000, unique=True, verbose_name='Matière')
     import_id = models.BigIntegerField(blank=True, unique=True, null=True)
 
@@ -86,16 +86,16 @@ class Matiere(models.Model):
 
 
 class Inventaire_Matiere(models.Model):
-    #Pour importcsv: column2=inventaire(Inventaire|import_id),column3=matiere(Matiere|import_id)
+    # Pour importcsv: column2=inventaire(Inventaire|import_id),column3=matiere(Matiere|import_id)
     inventaire = models.ForeignKey('Inventaire', on_delete=models.CASCADE)
     matiere = models.ForeignKey(Matiere, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.matiere)+"/"+str(self.inventaire)
+        return str(self.matiere) + "/" + str(self.inventaire)
 
 
 class Contact(models.Model):
-    #Pour importcsv: column1=import_id,column3=institution,column4=nom,column5=prenom
+    # Pour importcsv: column1=import_id,column3=institution,column4=nom,column5=prenom
     institution = models.CharField(max_length=1000, blank=True, verbose_name='Institution')
     nom = models.CharField(max_length=1000, blank=True, verbose_name='Nom')
     prenom = models.CharField(max_length=1000, blank=True, verbose_name='Prénom')
@@ -110,7 +110,7 @@ class Contact(models.Model):
 
 
 class CommentairePhoto(models.Model):
-    #Pour importcsv: column2=inventaire(Inventaire|import_id),column3=photographie(Photographie|import_id),column7=commentaire
+    # Pour importcsv: column2=inventaire(Inventaire|import_id),column3=photographie(Photographie|import_id),column7=commentaire
     inventaire = models.ForeignKey('Inventaire', on_delete=models.CASCADE)
     photographie = models.ForeignKey(Photographie, on_delete=models.CASCADE)
     commentaire = models.CharField(max_length=5000, blank=True)
@@ -122,11 +122,11 @@ class CommentairePhoto(models.Model):
         return self.inventaire.lien()
 
     def __str__(self):
-        return str(self.photographie)+"/"+str(self.inventaire)
+        return str(self.photographie) + "/" + str(self.inventaire)
 
 
 class RelationContact(models.Model):
-    #Pour importcsv: column2=inventaire(Inventaire|import_id),column3=contact(Contact|import_id),column7=etat,column8=debut,column9=fin,column10=prix_cession
+    # Pour importcsv: column2=inventaire(Inventaire|import_id),column3=contact(Contact|import_id),column7=etat,column8=debut,column9=fin,column10=prix_cession
 
     class EtatContact(models.TextChoices):
         ARTISTE = 'Artiste'
@@ -148,7 +148,7 @@ class RelationContact(models.Model):
     prix_cession = models.CharField(max_length=1000, blank=True, verbose_name='Prix Cession/Autre qualité')
 
     def __str__(self):
-        return str(self.contact)+"/"+str(self.inventaire)
+        return str(self.contact) + "/" + str(self.inventaire)
 
 
 class Inventaire(models.Model):
@@ -166,7 +166,8 @@ class Inventaire(models.Model):
     commande = models.BooleanField(null=True, verbose_name='Commande')
     volume = models.CharField(max_length=1000, blank=True, choices=ValeursVolume.choices, verbose_name='Volume')
     notes_mjb = models.TextField(blank=True, verbose_name='Notes Marie-Jo')
-    description = models.TextField(blank=True, verbose_name='Description')
+    description = models.TextField(blank=True, verbose_name='Description sculpture')
+    description_modele = models.TextField(blank=True, verbose_name='Description modèle')
     dim_hauteur = models.CharField(max_length=1000, blank=True, verbose_name='Hauteur (cm)')
     dim_base = models.CharField(max_length=1000, blank=True, verbose_name='Base (cm)')
     type_original_moulage = models.CharField(max_length=1000, blank=True, verbose_name='Connu/Inconnu/De suite')
@@ -180,11 +181,18 @@ class Inventaire(models.Model):
     matieres = models.ManyToManyField(Matiere, blank=True, verbose_name='matière', through=Inventaire_Matiere)
     contacts = models.ManyToManyField(Contact, through=RelationContact)
 
+    def description_du_modèle(self):
+        if self.inventaire_parent:
+            return self.inventaire_parent.description_du_modèle() + self.format_parent_description() + "\n "
+        return ""
 
     def notes_marie_jo_parent(self):
         if self.inventaire_parent:
-           return self.inventaire_parent.notes_marie_jo_parent() + self.format_parent_notes() + "\n "
+            return self.inventaire_parent.notes_marie_jo_parent() + self.format_parent_notes() + "\n "
         return ""
+
+    def format_parent_description(self):
+        return (str(self.inventaire_parent) + ": " + self.inventaire_parent.description_modele) if self.inventaire_parent.description_modele else ""
 
     def format_parent_notes(self):
         return (str(self.inventaire_parent) + ": " + self.inventaire_parent.notes_mjb) if self.inventaire_parent.notes_mjb else ""
