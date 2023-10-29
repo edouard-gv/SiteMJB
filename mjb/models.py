@@ -180,6 +180,15 @@ class Inventaire(models.Model):
     matieres = models.ManyToManyField(Matiere, blank=True, verbose_name='matière', through=Inventaire_Matiere)
     contacts = models.ManyToManyField(Contact, through=RelationContact)
 
+
+    def notes_marie_jo_parent(self):
+        if self.inventaire_parent:
+           return self.inventaire_parent.notes_marie_jo_parent() + self.format_parent_notes() + "\n "
+        return ""
+
+    def format_parent_notes(self):
+        return (str(self.inventaire_parent) + ": " + self.inventaire_parent.notes_mjb) if self.inventaire_parent.notes_mjb else ""
+
     def couverture(self):
         dernier_com_photo = CommentairePhoto.objects.filter(inventaire=self).exclude(photographie__image_ok=False).order_by("-id").first()
         if dernier_com_photo:

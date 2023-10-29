@@ -62,13 +62,13 @@ class InventaireInline(admin.TabularInline):
 
 class InventaireAdmin(admin.ModelAdmin):
     inlines = (InventaireInline, InventaireMatiereInline, InventaireThemeInline, CommentairePhotoInline, RelationContactInline, )
-    readonly_fields = ['lien_original', 'vignette_original', 'de_suite_de', 'vignette', 'date_creation', 'date_modification', ]
+    readonly_fields = ['lien_original', 'vignette_original', 'de_suite_de', 'vignette', 'date_creation', 'date_modification', 'notes_marie_jo_parent', ]
     fieldsets = [
         (None, {
             'fields': (('num_mgg', 'nom', 'vignette'), ('de_suite_de', 'vignette_original', ), ('num_mjb1', 'num_mjb2'),)
         }),
         (None, {
-            'fields': ('description', 'notes_mjb')
+            'fields': ('description', 'notes_marie_jo_parent', 'notes_mjb')
         }),
         (None, {
             'fields': ('commande', ('volume', 'dim_hauteur', 'dim_base'))
