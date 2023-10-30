@@ -151,8 +151,8 @@ class PhotographieAdmin(admin.ModelAdmin):
     inlines = (CommentairePhotoInline, )
     exclude = ('import_id', 'vignette_ok', 'image_ok')
 
-    list_display = ['nom_fichier', 'vignette50', 'liens_inventaires']
-    list_filter = ['image_ok',]
+    list_display = ['nom_fichier', 'vignette50', 'liens_inventaires', 'import_auto',]
+    list_filter = ['image_ok', 'vignette_ok', 'import_auto', ]
 
     def liens_inventaires(self, photo):
         return mark_safe(" ".join([com.inventaire.lien()

@@ -23,6 +23,7 @@ class Photographie(models.Model):
     import_id = models.BigIntegerField(blank=True, unique=True, null=True)
     image_ok = models.BooleanField(null=True)
     vignette_ok = models.BooleanField(null=True)
+    import_auto = models.BooleanField(null=False, default=False)
 
     def lien(self):
         return settings.RACINE_IMAGES + self.nom_fichier
