@@ -35,7 +35,7 @@ def cherche_premier_mgg(num_mjb):
 
 def get_liste_nom():
     noms = requests.get("https://www.mariejobourron.com/wp-content/uploads/inventaire/images-inventaire.php").text
-    return [nom.strip() for nom in noms.split("<br>") if nom.strip() != '' and not mignature(nom.strip())]
+    return sorted([nom.strip() for nom in noms.split("<br>") if nom.strip() != '' and not mignature(nom.strip())])
 
 
 def mignature(nom):
@@ -115,6 +115,10 @@ class MappingsTestCaseWithDB(django.test.TestCase):
     def test_mapp_NA(self):
         self.assertEqual(photo_mapping(['xxx']), [])
 
+class SortTestCase(unittest.TestCase):
+    def test_documenter_tri(self):
+        liste = [' ', '!', '%', '-', '0', '1', 'A', '_', 'a', 'z', 'À', 'É', 'à', 'é']
+        self.assertEqual(liste, sorted(liste))
 
 class UtilsTestCase(unittest.TestCase):
     def ko_test_noms_reels(self):
