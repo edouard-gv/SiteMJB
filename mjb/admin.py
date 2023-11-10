@@ -100,13 +100,13 @@ class InventaireAdmin(admin.ModelAdmin):
     ]
 
     def get_fieldsets(self, request, obj=None):
-        if obj.inventaire_parent:
+        if obj is None or obj.inventaire_parent:
             return self.fieldsets
         else:
             return self.fieldsets_model
 
     def get_readonly_fields(self, request, obj=None):
-        if obj.inventaire_parent:
+        if obj is None or obj.inventaire_parent:
             return self.readonly_fields
         else:
             return self.readonly_fields_modele
